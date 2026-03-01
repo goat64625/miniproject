@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrustLens AI | Product Link Authenticity Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one" aria-hidden="true"></div>
+    <div class="bg-orb orb-two" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__dot"></span>
+        <span>TrustLens <strong>AI</strong></span>
+      </div>
+      <span class="pill">Fraud Detection Assistant</span>
+    </header>
+
+    <main class="layout">
+      <section class="hero card">
+        <h1>Verify Product Links with AI-Powered Risk Analysis</h1>
+        <p>
+          Paste a product URL and key details. TrustLens AI evaluates description quality,
+          review authenticity, seller credibility, and risky signals to estimate if the
+          listing is likely genuine.
+        </p>
+      </section>
+
+      <section class="card form-card">
+        <h2>Product Evidence Input</h2>
+        <form id="checker-form">
+          <label for="url">Product URL</label>
+          <input
+            id="url"
+            name="url"
+            type="url"
+            placeholder="https://example.com/product/..."
+            required
+          />
+
+          <div class="grid two">
+            <div>
+              <label for="price">Price (optional)</label>
+              <input id="price" name="price" type="number" step="0.01" placeholder="1299" />
+            </div>
+            <div>
+              <label for="mrp">Market Price (optional)</label>
+              <input id="mrp" name="mrp" type="number" step="0.01" placeholder="1999" />
+            </div>
+          </div>
+
+          <label for="description">Product Description</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="5"
+            placeholder="Paste product features, specs, warranty, and brand details"
+            required
+          ></textarea>
+
+          <label for="reviews">Reviews Snapshot</label>
+          <textarea
+            id="reviews"
+            name="reviews"
+            rows="4"
+            placeholder="Paste 3-10 sample reviews with star ratings if available"
+            required
+          ></textarea>
+
+          <label for="seller">Seller Details</label>
+          <textarea
+            id="seller"
+            name="seller"
+            rows="4"
+            placeholder="Seller name, joined date, return policy, location, rating"
+            required
+          ></textarea>
+
+          <button type="submit">Analyze with AI</button>
+        </form>
+      </section>
+
+      <section class="card result-card" id="result-card" aria-live="polite">
+        <h2>Authenticity Verdict</h2>
+        <p class="muted">Run an analysis to view your AI confidence score.</p>
+
+        <div class="meter" aria-hidden="true">
+          <span id="meter-fill"></span>
+        </div>
+
+        <div class="score-row">
+          <div>
+            <p class="label">AI Confidence Score</p>
+            <p class="score" id="score">--</p>
+          </div>
+          <span id="risk-badge" class="risk-badge neutral">Awaiting Data</span>
+        </div>
+
+        <ul id="insights" class="insights"></ul>
+      </section>
+    </main>
+
+    <footer class="footer">© 2026 TrustLens AI • Use this as a decision support tool, not legal proof.</footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
