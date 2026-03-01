@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrustLens AI | URL-Only Product Authenticity Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one" aria-hidden="true"></div>
+    <div class="bg-orb orb-two" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__dot"></span>
+        <span>TrustLens <strong>AI</strong></span>
+      </div>
+      <span class="pill">URL-Only Fraud Detection</span>
+    </header>
+
+    <main class="layout">
+      <section class="hero card">
+        <h1>Paste a Product Link. TrustLens AI Handles the Rest.</h1>
+        <p>
+          You only need to enter the product URL. The app automatically attempts to extract
+          price, market value hints, product text, reviews signals, and seller clues—then
+          returns an AI-powered authenticity verdict.
+        </p>
+      </section>
+
+      <section class="card form-card">
+        <h2>Start Verification</h2>
+        <form id="checker-form">
+          <label for="url">Product URL</label>
+          <input
+            id="url"
+            name="url"
+            type="url"
+            placeholder="https://example.com/product/..."
+            required
+          />
+
+          <button type="submit" id="analyze-btn">Auto Analyze with AI</button>
+        </form>
+
+        <div class="extraction" id="extraction">
+          <h3>Auto-Extracted Signals</h3>
+          <ul id="extraction-list" class="extraction-list">
+            <li>Awaiting URL input.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card result-card" id="result-card" aria-live="polite">
+        <h2>Authenticity Verdict</h2>
+        <p class="muted" id="result-subtitle">Run analysis to view AI confidence score.</p>
+
+        <div class="meter" aria-hidden="true">
+          <span id="meter-fill"></span>
+        </div>
+
+        <div class="score-row">
+          <div>
+            <p class="label">AI Confidence Score</p>
+            <p class="score" id="score">--</p>
+          </div>
+          <span id="risk-badge" class="risk-badge neutral">Awaiting Data</span>
+        </div>
+
+        <ul id="insights" class="insights"></ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      © 2026 TrustLens AI • Auto-extraction depends on source-site access policies and CORS.
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
