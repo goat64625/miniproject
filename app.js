@@ -86,7 +86,39 @@ async function extractSignalsFromUrl(inputUrl) {
 }
 
 function extractFirstCurrency(text) {
-  const match = text.match(/(?:\$|₹|rs\.?\s*)(\d{2,6}(?:[.,]\d{1,2})?)/i);
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, "text/html");
+
+  const priceSelectors = [
+    "[itemprop='price']",
+    "meta[property='product:price:amount']",
+    "meta[name='twitter:data1']",
+    ".price",
+    ".product-price",
+    ".a-price .a-offscreen",
+    "[data-testid*='price']",
+    "[class*='price']",
+    "[id*='price']",
+  ];
+
+  for (const selector of priceSelectors) {
+    const nodes = doc.querySelectorAll(selector);
+    for (const node of nodes) {
+      const candidate =
+        node.getAttribute("content") ||
+        node.getAttribute("value") ||
+        node.textContent ||
+        "";
+      const parsed = parseCurrencyValue(candidate);
+      if (parsed > 0) return parsed;
+    }
+  }
+
+  return parseCurrencyValue(text);
+}
+
+function parseCurrencyValue(value) {
+  const match = value.match(/(?:\$|₹|rs\.?\s*)(\d{2,6}(?:[.,]\d{1,2})?)/i);
   if (!match) return 0;
   return Number(match[1].replace(/,/g, "")) || 0;
 }
