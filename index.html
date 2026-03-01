@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TrustLens AI | URL-Only Product Authenticity Checker</title>
+    <title>TrustLens AI | Product Link Authenticity Checker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,21 +21,21 @@
         <span class="brand__dot"></span>
         <span>TrustLens <strong>AI</strong></span>
       </div>
-      <span class="pill">URL-Only Fraud Detection</span>
+      <span class="pill">Fraud Detection Assistant</span>
     </header>
 
     <main class="layout">
       <section class="hero card">
-        <h1>Paste a Product Link. TrustLens AI Handles the Rest.</h1>
+        <h1>Verify Product Links with AI-Powered Risk Analysis</h1>
         <p>
-          You only need to enter the product URL. The app automatically attempts to extract
-          price, market value hints, product text, reviews signals, and seller clues—then
-          returns an AI-powered authenticity verdict.
+          Paste a product URL and key details. TrustLens AI evaluates description quality,
+          review authenticity, seller credibility, and risky signals to estimate if the
+          listing is likely genuine.
         </p>
       </section>
 
       <section class="card form-card">
-        <h2>Start Verification</h2>
+        <h2>Product Evidence Input</h2>
         <form id="checker-form">
           <label for="url">Product URL</label>
           <input
@@ -46,20 +46,51 @@
             required
           />
 
-          <button type="submit" id="analyze-btn">Auto Analyze with AI</button>
-        </form>
+          <div class="grid two">
+            <div>
+              <label for="price">Price (optional)</label>
+              <input id="price" name="price" type="number" step="0.01" placeholder="1299" />
+            </div>
+            <div>
+              <label for="mrp">Market Price (optional)</label>
+              <input id="mrp" name="mrp" type="number" step="0.01" placeholder="1999" />
+            </div>
+          </div>
 
-        <div class="extraction" id="extraction">
-          <h3>Auto-Extracted Signals</h3>
-          <ul id="extraction-list" class="extraction-list">
-            <li>Awaiting URL input.</li>
-          </ul>
-        </div>
+          <label for="description">Product Description</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="5"
+            placeholder="Paste product features, specs, warranty, and brand details"
+            required
+          ></textarea>
+
+          <label for="reviews">Reviews Snapshot</label>
+          <textarea
+            id="reviews"
+            name="reviews"
+            rows="4"
+            placeholder="Paste 3-10 sample reviews with star ratings if available"
+            required
+          ></textarea>
+
+          <label for="seller">Seller Details</label>
+          <textarea
+            id="seller"
+            name="seller"
+            rows="4"
+            placeholder="Seller name, joined date, return policy, location, rating"
+            required
+          ></textarea>
+
+          <button type="submit">Analyze with AI</button>
+        </form>
       </section>
 
       <section class="card result-card" id="result-card" aria-live="polite">
         <h2>Authenticity Verdict</h2>
-        <p class="muted" id="result-subtitle">Run analysis to view AI confidence score.</p>
+        <p class="muted">Run an analysis to view your AI confidence score.</p>
 
         <div class="meter" aria-hidden="true">
           <span id="meter-fill"></span>
@@ -77,9 +108,7 @@
       </section>
     </main>
 
-    <footer class="footer">
-      © 2026 TrustLens AI • Auto-extraction depends on source-site access policies and CORS.
-    </footer>
+    <footer class="footer">© 2026 TrustLens AI • Use this as a decision support tool, not legal proof.</footer>
 
     <script src="app.js"></script>
   </body>
