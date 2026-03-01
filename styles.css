@@ -87,7 +87,7 @@ body {
 
 .layout {
   display: grid;
-  grid-template-columns: 1.1fr 1.2fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
   gap: 1rem;
   padding-bottom: 2rem;
 }
@@ -108,7 +108,7 @@ body {
 .hero h1 {
   margin-top: 0;
   margin-bottom: 0.8rem;
-  max-width: 700px;
+  max-width: 760px;
   font-size: clamp(1.4rem, 2.4vw, 2rem);
 }
 
@@ -119,18 +119,23 @@ body {
   max-width: 760px;
 }
 
-.form-card {
-  grid-column: span 2;
-  padding: 1.4rem;
-}
-
+.form-card,
 .result-card {
   padding: 1.4rem;
 }
 
-h2 {
+h2,
+h3 {
   margin-top: 0;
+}
+
+h2 {
   font-size: 1.12rem;
+}
+
+h3 {
+  font-size: 0.95rem;
+  color: #d7dffd;
 }
 
 label {
@@ -141,35 +146,22 @@ label {
 }
 
 input,
-textarea,
 button {
   width: 100%;
   border-radius: 12px;
   font: inherit;
 }
 
-input,
-textarea {
+input {
   border: 1px solid rgba(162, 174, 216, 0.25);
   background: rgba(9, 14, 30, 0.65);
   color: var(--text);
-  padding: 0.78rem 0.85rem;
+  padding: 0.85rem;
 }
 
-textarea {
-  resize: vertical;
-}
-
-input:focus,
-textarea:focus {
+input:focus {
   outline: 2px solid rgba(88, 216, 255, 0.35);
   border-color: var(--primary-2);
-}
-
-.grid.two {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.8rem;
 }
 
 button {
@@ -178,13 +170,35 @@ button {
   background: linear-gradient(120deg, var(--primary), var(--primary-2));
   color: white;
   font-weight: 700;
-  padding: 0.85rem 1rem;
+  padding: 0.9rem 1rem;
   cursor: pointer;
-  transition: transform 150ms ease;
+  transition: transform 150ms ease, opacity 120ms ease;
 }
 
 button:hover {
   transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.75;
+  cursor: progress;
+}
+
+.extraction {
+  margin-top: 1rem;
+  border: 1px solid rgba(162, 174, 216, 0.22);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: rgba(7, 11, 24, 0.45);
+}
+
+.extraction-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: #cfdaff;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.88rem;
 }
 
 .muted {
@@ -272,8 +286,5 @@ button:hover {
   .layout {
     grid-template-columns: 1fr;
   }
-
-  .form-card {
-    grid-column: auto;
-  }
 }
+
