@@ -28,9 +28,9 @@
       <section class="hero card">
         <h1>Paste a Product Link. TrustLens AI Handles the Rest.</h1>
         <p>
-          You only need to enter the product URL. The app automatically attempts to extract
-          price, market value hints, product text, reviews signals, and seller clues—then
-          returns an AI-powered authenticity verdict.
+          Enter a product page URL and your Gemini API key. TrustLens extracts webpage context,
+          seller clues, pricing hints, and review signals, then sends a structured payload to
+          Gemini for a detailed authenticity assessment.
         </p>
       </section>
 
@@ -46,7 +46,22 @@
             required
           />
 
-          <button type="submit" id="analyze-btn">Auto Analyze with AI</button>
+          <label for="gemini-api-key">Gemini API Key</label>
+          <input
+            id="gemini-api-key"
+            name="geminiApiKey"
+            type="password"
+            placeholder="AIza..."
+            autocomplete="off"
+            required
+          />
+
+          <p class="helper-text">
+            The key is used only for the live Gemini request from your browser and is never stored
+            by this demo.
+          </p>
+
+          <button type="submit" id="analyze-btn">Analyze with AI</button>
         </form>
 
         <div class="extraction" id="extraction">
@@ -59,7 +74,7 @@
 
       <section class="card result-card" id="result-card" aria-live="polite">
         <h2>Authenticity Verdict</h2>
-        <p class="muted" id="result-subtitle">Run analysis to view AI confidence score.</p>
+        <p class="muted" id="result-subtitle">Run analysis to view Gemini's response.</p>
 
         <div class="meter" aria-hidden="true">
           <span id="meter-fill"></span>
@@ -74,11 +89,17 @@
         </div>
 
         <ul id="insights" class="insights"></ul>
+
+        <div class="gemini-response">
+          <h3>Gemini Analysis</h3>
+          <pre id="gemini-output">No Gemini response yet.</pre>
+        </div>
       </section>
     </main>
 
     <footer class="footer">
-      © 2026 TrustLens AI • Auto-extraction depends on source-site access policies and CORS.
+      © 2026 TrustLens AI • Auto-extraction depends on source-site access policies, CORS, and your
+      Gemini API access.
     </footer>
 
     <script src="app.js"></script>

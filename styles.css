@@ -184,7 +184,15 @@ button:disabled {
   cursor: progress;
 }
 
-.extraction {
+.helper-text {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.extraction,
+.gemini-response {
   margin-top: 1rem;
   border: 1px solid rgba(162, 174, 216, 0.22);
   border-radius: 14px;
@@ -226,6 +234,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
@@ -276,6 +285,13 @@ button:disabled {
   gap: 0.5rem;
 }
 
+#gemini-output {
+  margin: 0;
+  white-space: pre-wrap;
+  font: 0.88rem/1.6 "Inter", system-ui, sans-serif;
+  color: #e4ebff;
+}
+
 .footer {
   padding: 0.6rem 0 1.4rem;
   color: var(--muted);
@@ -288,3 +304,10 @@ button:disabled {
   }
 }
 
+@media (max-width: 640px) {
+  .topbar,
+  .score-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
