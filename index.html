@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TrustLens AI | URL-Only Product Authenticity Checker</title>
+    <title>TrustLens AI | AI Product Price Checker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,21 +21,22 @@
         <span class="brand__dot"></span>
         <span>TrustLens <strong>AI</strong></span>
       </div>
-      <span class="pill">URL-Only Fraud Detection</span>
+      <span class="pill">Server-side Gemini Pricing</span>
     </header>
 
     <main class="layout">
       <section class="hero card">
-        <h1>Paste a Product Link. TrustLens AI Handles the Rest.</h1>
+        <h1>Paste a product URL. Get AI pricing, product details, and cached results.</h1>
         <p>
-          Enter a product page URL and your Gemini API key. TrustLens extracts webpage context,
-          seller clues, pricing hints, and review signals, then sends a structured payload to
-          Gemini for a detailed authenticity assessment.
+          TrustLens fetches the page on the server, sends structured context to Gemini 3 Flash
+          Preview, and shows the detected product image, current price, original price, discount,
+          stock status, merchant, and AI summary. Re-checking the same link uses the cached result
+          instead of spending time processing again.
         </p>
       </section>
 
       <section class="card form-card">
-        <h2>Start Verification</h2>
+        <h2>Analyze Product Link</h2>
         <form id="checker-form">
           <label for="url">Product URL</label>
           <input
@@ -45,36 +46,58 @@
             placeholder="https://example.com/product/..."
             required
           />
-
-          <label for="gemini-api-key">Gemini API Key</label>
-          <input
-            id="gemini-api-key"
-            name="geminiApiKey"
-            type="password"
-            placeholder="AIza..."
-            autocomplete="off"
-            required
-          />
-
-          <p class="helper-text">
-            The key is used only for the live Gemini request from your browser and is never stored
-            by this demo.
-          </p>
-
-          <button type="submit" id="analyze-btn">Analyze with AI</button>
+          <button type="submit" id="analyze-btn">Analyze URL</button>
         </form>
 
-        <div class="extraction" id="extraction">
-          <h3>Auto-Extracted Signals</h3>
-          <ul id="extraction-list" class="extraction-list">
-            <li>Awaiting URL input.</li>
-          </ul>
+        <div class="loading-panel hidden" id="loading-panel" aria-live="polite">
+          <div class="loader"></div>
+          <div>
+            <strong>Analyzing with AI…</strong>
+            <p id="loading-text">Fetching the product page and preparing Gemini analysis.</p>
+          </div>
         </div>
       </section>
 
       <section class="card result-card" id="result-card" aria-live="polite">
-        <h2>Authenticity Verdict</h2>
-        <p class="muted" id="result-subtitle">Run analysis to view Gemini's response.</p>
+        <div class="result-header">
+          <div>
+            <h2 id="product-name">Awaiting product URL</h2>
+            <p class="muted" id="result-subtitle">Results will appear here after analysis.</p>
+          </div>
+          <span id="cache-badge" class="risk-badge neutral">No Result Yet</span>
+        </div>
+
+        <div class="product-media empty" id="product-media">
+          <img id="product-image" alt="Detected product" />
+          <div class="image-placeholder" id="image-placeholder">No product image yet.</div>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+          <article class="stat-card">
+            <span class="label">Current Price</span>
+            <strong id="price-value">--</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Original Price</span>
+            <strong id="original-price-value">--</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Discount</span>
+            <strong id="discount-value">--</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Availability</span>
+            <strong id="availability-value">--</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Brand</span>
+            <strong id="brand-value">--</strong>
+          </article>
+          <article class="stat-card">
+            <span class="label">Merchant</span>
+            <strong id="merchant-value">--</strong>
+          </article>
+        </div>
 
         <div class="meter" aria-hidden="true">
           <span id="meter-fill"></span>
@@ -82,24 +105,28 @@
 
         <div class="score-row">
           <div>
-            <p class="label">AI Confidence Score</p>
+            <p class="label">AI Confidence</p>
             <p class="score" id="score">--</p>
           </div>
-          <span id="risk-badge" class="risk-badge neutral">Awaiting Data</span>
+          <span id="risk-badge" class="risk-badge neutral">Awaiting Analysis</span>
         </div>
 
-        <ul id="insights" class="insights"></ul>
+        <div class="summary-panel">
+          <h3>AI Summary</h3>
+          <p id="summary-text" class="summary-text">No AI summary yet.</p>
+        </div>
 
-        <div class="gemini-response">
-          <h3>Gemini Analysis</h3>
-          <pre id="gemini-output">No Gemini response yet.</pre>
+        <div class="extraction">
+          <h3>Key Details</h3>
+          <ul id="insights" class="insights">
+            <li>Paste a URL to start.</li>
+          </ul>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      © 2026 TrustLens AI • Auto-extraction depends on source-site access policies, CORS, and your
-      Gemini API access.
+      © 2026 TrustLens AI • Gemini API keys stay server-side through the backend proxy.
     </footer>
 
     <script src="app.js"></script>
