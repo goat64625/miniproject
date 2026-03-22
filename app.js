@@ -23,7 +23,13 @@ const insights = document.getElementById("insights");
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(form);
-  const url = `${formData.get("url") || ""}`.trim();
+  const rawUrl = `${formData.get("url") || ""}`.trim();
+  const normalizedUrl = normalizeInputUrl(rawUrl);
+
+  if (!normalizedUrl) {
+    renderError("Enter a valid product URL to start the analysis.");
+    return;
+  }
 
   setLoading(true, "Fetching the product page and preparing Gemini analysis.");
   subtitle.textContent = "Waiting for server-side AI analysis…";
@@ -34,7 +40,7 @@ form.addEventListener("submit", async (event) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url: normalizedUrl }),
     });
 
     const payload = await response.json();
@@ -42,6 +48,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error(payload?.error || "Analysis failed.");
     }
 
+    form.elements.url.value = normalizedUrl;
     renderResult(payload);
   } catch (error) {
     renderError(error.message || "Unable to analyze this URL.");
@@ -123,6 +130,19 @@ function renderError(message) {
   riskBadge.className = "risk-badge high";
   scoreEl.textContent = "--";
   meterFill.style.width = "0%";
+}
+
+function normalizeInputUrl(value) {
+  if (!value) return "";
+
+  const withProtocol = /^[a-z][a-z\d+\-.]*:\/\//i.test(value) ? value : `https://${value}`;
+
+  try {
+    const parsed = new URL(withProtocol);
+    return ["http:", "https:"].includes(parsed.protocol) ? parsed.toString() : "";
+  } catch {
+    return "";
+  }
 }
 
 function formatMoney(value, currency) {
