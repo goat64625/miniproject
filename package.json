@@ -1,0 +1,9 @@
+{
+  "name": "trustlens-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TrustLens AI demo with backend Gemini proxy",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
