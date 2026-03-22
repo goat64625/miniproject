@@ -6,37 +6,52 @@ const insights = document.getElementById("insights");
 const extractionList = document.getElementById("extraction-list");
 const subtitle = document.getElementById("result-subtitle");
 const analyzeBtn = document.getElementById("analyze-btn");
+const geminiOutput = document.getElementById("gemini-output");
 
 const trustedDomains = ["amazon.", "flipkart.", "walmart.", "bestbuy.", "target.", "ebay.", "etsy."];
 const riskyTerms = ["no warranty", "copy", "replica", "urgent", "cash only", "wire transfer"];
 const trustSignals = ["warranty", "invoice", "return", "authentic", "certified", "brand"];
 const sellerSignals = ["rating", "years", "return", "verified", "policy", "support"];
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const data = new FormData(form);
   const inputUrl = (data.get("url") || "").toString().trim();
+  const geminiApiKey = (data.get("geminiApiKey") || "").toString().trim();
 
   analyzeBtn.disabled = true;
   analyzeBtn.textContent = "Analyzing...";
   subtitle.textContent = "Collecting product details automatically from the URL...";
+  geminiOutput.textContent = "Waiting for Gemini response...";
 
   try {
     const extracted = await extractSignalsFromUrl(inputUrl);
     renderExtraction(extracted);
 
-    const analysis = scoreListing(extracted);
-    updateUI(analysis.score, analysis.notes);
+    const heuristicAnalysis = scoreListing(extracted);
+    updateUI(heuristicAnalysis.score, heuristicAnalysis.notes);
 
     subtitle.textContent = extracted.fetchMode.includes("Live")
-      ? "Analysis completed using live extraction from the provided URL."
-      : "Analysis completed using smart inference when direct extraction was limited.";
+      ? "Sending extracted page context to Gemini for a detailed verdict."
+      : "Page access was limited, so Gemini will analyze the inferred product context.";
+
+    const geminiResult = await analyzeWithGemini(extracted, heuristicAnalysis, geminiApiKey);
+    const finalScore = Number.isFinite(geminiResult.score)
+      ? clamp(geminiResult.score, 0, 100)
+      : heuristicAnalysis.score;
+    const mergedNotes = [...geminiResult.highlights, ...heuristicAnalysis.notes];
+
+    updateUI(finalScore, mergedNotes);
+    geminiOutput.textContent = geminiResult.fullText;
+    subtitle.textContent = "Gemini analysis completed using the extracted webpage data.";
   } catch (error) {
-    subtitle.textContent = "Could not analyze this link. Please check the URL and try again.";
-    updateUI(0, ["AI insight: URL processing failed due to invalid or unreachable input."]);
+    subtitle.textContent = error.message || "Could not analyze this link. Please check the URL and try again.";
+    geminiOutput.textContent = `Error: ${error.message || "Unknown error"}`;
+    updateUI(0, ["AI insight: URL processing failed due to invalid input, unreachable content, or Gemini API issues."]);
   } finally {
     analyzeBtn.disabled = false;
-    analyzeBtn.textContent = "Auto Analyze with AI";
+    analyzeBtn.textContent = "Analyze with AI";
   }
 });
 
@@ -51,7 +66,6 @@ async function extractSignalsFromUrl(inputUrl) {
   const host = normalized.hostname.toLowerCase();
   const pathText = decodeURIComponent(normalized.pathname.replace(/[-_/]/g, " ")).toLowerCase();
 
-  // Attempt live text extraction through a read-only mirror that works on many public pages.
   let pageText = "";
   let fetchMode = "Inference";
 
@@ -63,18 +77,18 @@ async function extractSignalsFromUrl(inputUrl) {
       fetchMode = "Live + Inference";
     }
   } catch {
-    // continue with inference fallback
+    // fallback remains inference only
   }
 
   const mergedText = `${pathText} ${pageText}`.trim();
 
-  const extractedPrice = extractFirstCurrency(mergedText);
+  const extractedPrice = extractFirstCurrency(pageText || mergedText);
   const marketPrice = extractMarketPrice(mergedText, extractedPrice);
   const sellerHint = extractSellerHint(mergedText, host);
   const reviewHint = extractReviewHint(mergedText);
 
   return {
-    url: normalized.href.toLowerCase(),
+    url: normalized.href,
     host,
     descriptionText: summarizeDescription(mergedText, pathText),
     reviewText: reviewHint,
@@ -82,6 +96,7 @@ async function extractSignalsFromUrl(inputUrl) {
     price: extractedPrice,
     mrp: marketPrice,
     fetchMode,
+    pageExcerpt: mergedText.slice(0, 4000),
   };
 }
 
@@ -154,7 +169,7 @@ function scoreListing(extracted) {
   const notes = [];
   let score = 50;
 
-  if (trustedDomains.some((domain) => extracted.url.includes(domain))) {
+  if (trustedDomains.some((domain) => extracted.url.toLowerCase().includes(domain))) {
     score += 12;
     notes.push("URL domain matches a commonly trusted marketplace.");
   } else {
@@ -231,8 +246,90 @@ function scoreListing(extracted) {
   }
 
   return {
-    score: Math.max(0, Math.min(100, score)),
+    score: clamp(score, 0, 100),
     notes,
+  };
+}
+
+async function analyzeWithGemini(extracted, heuristicAnalysis, apiKey) {
+  if (!apiKey) {
+    throw new Error("Gemini API key is required.");
+  }
+
+  const prompt = [
+    "You are evaluating whether an ecommerce listing looks trustworthy or potentially fraudulent.",
+    "Use only the provided webpage-derived signals.",
+    "Return strict JSON with keys: score (0-100 number), verdict (string), highlights (array of short strings), summary (string).",
+    `URL: ${extracted.url}`,
+    `Host: ${extracted.host}`,
+    `Fetch Mode: ${extracted.fetchMode}`,
+    `Detected Price: ${extracted.price || "unknown"}`,
+    `Estimated Market Price: ${extracted.mrp || "unknown"}`,
+    `Seller Signals: ${extracted.sellerText}`,
+    `Review Signals: ${extracted.reviewText}`,
+    `Description Summary: ${extracted.descriptionText}`,
+    `Heuristic Score: ${heuristicAnalysis.score}`,
+    `Heuristic Notes: ${heuristicAnalysis.notes.join(" | ")}`,
+    `Page Excerpt: ${extracted.pageExcerpt}`,
+  ].join("\n");
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.2,
+        },
+      }),
+    }
+  );
+
+  const payload = await response.json();
+  if (!response.ok) {
+    const message = payload?.error?.message || "Gemini request failed.";
+    throw new Error(message);
+  }
+
+  const rawText = payload?.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("\n").trim();
+  if (!rawText) {
+    throw new Error("Gemini returned an empty response.");
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch {
+    parsed = {
+      score: heuristicAnalysis.score,
+      verdict: "Manual review recommended",
+      highlights: ["Gemini response was not valid JSON; showing raw output."],
+      summary: rawText,
+    };
+  }
+
+  const summaryLines = [
+    `Verdict: ${parsed.verdict || "Unavailable"}`,
+    `Score: ${Number.isFinite(parsed.score) ? parsed.score : heuristicAnalysis.score}`,
+    "Highlights:",
+    ...(Array.isArray(parsed.highlights) && parsed.highlights.length ? parsed.highlights.map((item) => `- ${item}`) : ["- No highlights returned."]),
+    "",
+    `Summary: ${parsed.summary || "No summary returned."}`,
+  ];
+
+  return {
+    score: Number(parsed.score),
+    highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [parsed.summary || "No Gemini highlights returned."],
+    fullText: summaryLines.join("\n"),
   };
 }
 
@@ -246,6 +343,7 @@ function renderExtraction(extracted) {
     `Estimated market price: ${extracted.mrp ? extracted.mrp : "Not found"}`,
     `Seller signal snapshot: ${truncate(extracted.sellerText, 110)}`,
     `Review signal snapshot: ${truncate(extracted.reviewText, 110)}`,
+    `Description snapshot: ${truncate(extracted.descriptionText, 110)}`,
   ];
 
   rows.forEach((row) => {
@@ -279,9 +377,13 @@ function updateUI(score, notes) {
   badge.className = `risk-badge ${cls}`;
 
   insights.innerHTML = "";
-  notes.slice(0, 7).forEach((note) => {
+  notes.slice(0, 8).forEach((note) => {
     const li = document.createElement("li");
     li.textContent = `AI insight: ${note}`;
     insights.appendChild(li);
   });
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
